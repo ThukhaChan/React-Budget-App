@@ -1,64 +1,105 @@
 import React from "react";
-import { fetchData } from "./helper";
+import { createBudget, fetchData, waait, createExpense } from "./helper";
 import { useLoaderData } from "react-router-dom";
 import Intro from "../components/Intro";
-import { toast } from 'react-toastify';
+import { toast } from "react-toastify";
 import AddBudgetForm from "../components/AddBudgetForm";
+import AddExpenseForm from "../components/AddExpenseForm";
+import BudgetItem from "../components/BudgetItem";
+import Table from "../components/Table";
 
 export function dashboardLoader() {
   const userName = fetchData("userName");
   const budgets = fetchData("budgets");
-  return { userName , budgets};
+  const expenses = fetchData("expenses");
+  return { userName, budgets, expenses };
 }
 
-export async function dashboardAction({request}){
-  const data= await request.formData();
-  const {_action,...values}=Object.fromEntries(data);
+export async function dashboardAction({ request }) {
+  await waait();
+  const data = await request.formData();
+  const { _action, ...values } = Object.fromEntries(data);
 
-  if(_action==="newUser")
-  {
-    try
-    {
-     localStorage.setItem("userName",JSON.stringify(values.userName));
-     return toast.success(`Welcome, ${values.userName}`);
+  if (_action === "newUser") {
+    try {
+      localStorage.setItem("userName", JSON.stringify(values.userName));
+      return toast.success(`Welcome, ${values.userName}`);
+    } catch (e) {
+      throw new Error("There was an error creating your account");
     }
-    catch(e)
-    {
-     throw new Error("There was an error creating your account")
+  }
+  // Budget
+  if (_action === "createBudget") {
+    try {
+      createBudget({
+        name: values.newBudget,
+        amount: values.newBudgetAmount,
+      });
+      return toast.success("Budget Created");
+    } catch (e) {
+      throw new Error("There was an error creating your Budget");
     }
-  } 
-  if(_action==="createBudget")
-  {
-    try
-    {
-     return toast.success("Budget Created");
+  }
+  // Expense
+  if (_action === "createExpense") {
+    try {
+      createExpense({
+        name: values.newExpense,
+        amount: values.newExpenseAmount,
+        budgetId: values.newExpenseBudget,
+      });
+      return toast.success("Expense Created");
+    } catch (e) {
+      throw new Error("There was an error creating your Expense");
     }
-    catch(e)
-    {
-     throw new Error("There was an error creating your Budget")
-    }
-
   }
 }
 function Dashboard() {
-  const { userName } = useLoaderData();
+  const { userName, budgets, expenses } = useLoaderData();
   return (
     <div>
       <main>
-      {userName?(
-        <div className="dashboard">
-          <h1>Welcome Back,<span className="accent">
-            {userName}
-            </span></h1>
+        {userName ? (
+          <div className="dashboard">
+            <h1>
+              Welcome Back,<span className="accent">{userName}</span>
+            </h1>
             <div className="grid-sm">
-             <div className="grid-lg">
-              <div className="flex-lg">
-                <AddBudgetForm/>
-              </div>
-             </div>
+              {budgets && budgets.length > 0 ? (
+                <div className="grid-lg">
+                  <div className="flex-lg">
+                    <AddBudgetForm />
+                    <AddExpenseForm budgets={budgets} />
+                  </div>
+                  <h2>Exiting Budget</h2>
+                  <div className="budgets">
+                    {budgets.map((budget) => (
+                      <BudgetItem key={budget.id} budget={budget} />
+                    ))}
+                  </div>
+                  {expenses && expenses.length > 0 && (
+                    <div className="grid-md">
+                      <h2>Recent Expenses</h2>
+                      <Table
+                        expenses={expenses.sort(
+                          (a, b) => b.createdAt - a.createdAt
+                        )}
+                      />
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="grid-sm">
+                  <p>Personal budgeting is the secret to financial freedom.</p>
+                  <p>Create a budget to get started!</p>
+                  <AddBudgetForm />
+                </div>
+              )}
             </div>
-        </div>
-      ):(<Intro/>)}
+          </div>
+        ) : (
+          <Intro />
+        )}
       </main>
     </div>
   );
