@@ -1,6 +1,6 @@
 import React from "react";
 import { createBudget, fetchData, waait, createExpense } from "./helper";
-import { useLoaderData } from "react-router-dom";
+import { Link, useLoaderData } from "react-router-dom";
 import Intro from "../components/Intro";
 import { toast } from "react-toastify";
 import AddBudgetForm from "../components/AddBudgetForm";
@@ -83,8 +83,13 @@ function Dashboard() {
                       <Table
                         expenses={expenses.sort(
                           (a, b) => b.createdAt - a.createdAt
-                        )}
+                        ).slice(0,8)}
                       />
+                      {expenses.length>8 && (
+                        <Link>
+                        
+                        </Link>
+                      )}
                     </div>
                   )}
                 </div>
