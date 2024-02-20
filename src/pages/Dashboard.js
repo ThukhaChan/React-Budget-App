@@ -1,5 +1,11 @@
 import React from "react";
-import { createBudget, fetchData, waait, createExpense } from "./helper";
+import {
+  createBudget,
+  fetchData,
+  waait,
+  createExpense,
+  deleteItem,
+} from "./helper";
 import { Link, useLoaderData } from "react-router-dom";
 import Intro from "../components/Intro";
 import { toast } from "react-toastify";
@@ -53,6 +59,17 @@ export async function dashboardAction({ request }) {
       throw new Error("There was an error creating your Expense");
     }
   }
+  if (_action === "deleteExpense") {
+    try {
+      deleteItem({
+        key: "expenses",
+        id: values.expenseId,
+      });
+      return toast.success("Expense Deleted");
+    } catch (e) {
+      throw new Error("There was an error deleting your Expense");
+    }
+  }
 }
 function Dashboard() {
   const { userName, budgets, expenses } = useLoaderData();
@@ -81,13 +98,13 @@ function Dashboard() {
                     <div className="grid-md">
                       <h2>Recent Expenses</h2>
                       <Table
-                        expenses={expenses.sort(
-                          (a, b) => b.createdAt - a.createdAt
-                        ).slice(0,8)}
+                        expenses={expenses
+                          .sort((a, b) => b.createdAt - a.createdAt)
+                          .slice(0, 3)}
                       />
-                      {expenses.length>8 && (
-                        <Link>
-                        
+                      {expenses.length > 3 && (
+                        <Link to="expenses" className="btn btn--dark">
+                          View all expenses
                         </Link>
                       )}
                     </div>

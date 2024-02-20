@@ -35,8 +35,8 @@ const AddExpenseForm = ({ budgets }) => {
               name="newExpense"
               id="newExpense"
               placeholder=" e.g., Coffee"
-              required
               ref={focusRef}
+              required
             />
           </div>
           <div className="grid-xs">
@@ -52,7 +52,7 @@ const AddExpenseForm = ({ budgets }) => {
             />
           </div>
         </div>
-        <div className="grid-xs">
+        <div className="grid-xs" hidden={budgets.length === 1}>
           <label htmlFor="newExpenseBudget">Budget Category</label>
           <select name="newExpenseBudget" id="newExpenseBudget" required>
             {budgets

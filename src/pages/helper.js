@@ -12,7 +12,20 @@ export const fetchData = (key) => {
   const data = localStorage.getItem(key);
   return JSON.parse(data);
 };
-
+//Get all item from local storage
+export const getAllMatchingItems=({category,key,value})=>{
+  const data=fetchData(category)?? [];
+  return data.filter((item)=>item[key]===value)
+}
+//deleteitem
+export const deleteItem =({key,id})=>{
+  const exitingData = fetchData(key);
+  if(id){
+    const newData =exitingData.filter((item)=>item.id !== id);
+    return localStorage.setItem(key,JSON.stringify(newData));
+  }
+  return localStorage.removeItem(key);
+}
 //create budget
 export const createBudget=({
   name , amount
@@ -61,9 +74,9 @@ export const calculateSpentByBudget=(budgetId)=>
     {
        return acc
     }
-  return acc +=expense.amount
+   return acc += expense.amount
   
-  },0)
+  }, 0 )
   return budgetSpent;
 }
 export const formatDateToLocaleString=(epoch)=>
@@ -77,6 +90,7 @@ export const formatPercentage=(amt)=>
     minimumFractionDigits:0,
   })
 }
+
 export const formatCurrency=(amt)=>
 {
   return amt.toLocaleString(undefined,
